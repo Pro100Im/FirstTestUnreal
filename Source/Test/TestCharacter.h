@@ -1,6 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
@@ -16,6 +19,9 @@ class TEST_API ATestCharacter : public ACharacter
 protected:
 	UPROPERTY(EditAnywhere)
 	class UCameraComponent* Camera;
+
+	UPROPERTY(EditAnywhere)
+	class USpringArmComponent* SpringArm;
 
 	UPROPERTY(EditAnywhere, Category = "Enhanced Input")
 	class UInputMappingContext* InputContext;
