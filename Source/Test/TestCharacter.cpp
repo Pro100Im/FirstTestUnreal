@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "TestCharacter.h"
 #include "Camera/CameraComponent.h"
 
@@ -19,29 +18,33 @@ ATestCharacter::ATestCharacter()
 void ATestCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
-void ATestCharacter::MoveForward(float InputValue)
+void ATestCharacter::Move(const FInputActionValue& InputValue)
 {
-	FVector ForwardDirection = GetActorForwardVector();
-	AddMovementInput(ForwardDirection, InputValue);
+	FVector2D InputVector = InputValue.Get<FVector2D>();
+
+	if (IsValid(Controller))
+	{
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		AddMovementInput(ForwardDirection, InputVector.Y);
+		AddMovementInput(RightDirection, InputVector.X);
+	};
 }
 
-void ATestCharacter::MoveRight(float InputValue)
+void ATestCharacter::Look(const FInputActionValue& InputValue)
 {
-	FVector RightDirection = GetActorRightVector();
-	AddMovementInput(RightDirection, InputValue);
-}
+	FVector2D InputVector = InputValue.Get<FVector2D>();
 
-void ATestCharacter::Turn(float InputValue)
-{
-	AddControllerYawInput(InputValue);
-}
-
-void ATestCharacter::LookUp(float InputValue) 
-{
-	AddControllerPitchInput(InputValue);
+	if (IsValid(Controller))
+	{
+		AddControllerYawInput(InputVector.X);
+		AddControllerPitchInput(InputVector.Y);
+	};
 }
 
 // Called every frame
@@ -55,10 +58,19 @@ void ATestCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAxis("MoveForward", this, &ATestCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &ATestCharacter::MoveRight);
-	PlayerInputComponent->BindAxis("TurnCamera", this, &ATestCharacter::Turn);
-	PlayerInputComponent->BindAxis("LookUp", this, &ATestCharacter::LookUp);
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller)) 
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			SubSystem->AddMappingContext(InputContext, 0);
+		}
+	}
+
+	if (UEnhancedInputComponent* Input = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) 
+	{
+		Input->BindAction(MovementAction, ETriggerEvent::Triggered, this, &ATestCharacter::Move);
+		Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &ATestCharacter::Look);
+		Input->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ATestCharacter::Jump);
+	}
 }
 
