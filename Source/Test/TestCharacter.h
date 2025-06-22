@@ -47,6 +47,10 @@ protected:
 
 	void Look(const FInputActionValue& InputValue);
 
+	void ToggleLockOn();
+
+	void ChangeLockOnTarget();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

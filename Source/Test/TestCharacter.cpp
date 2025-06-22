@@ -52,6 +52,14 @@ void ATestCharacter::Look(const FInputActionValue& InputValue)
 	};
 }
 
+void ATestCharacter::ToggleLockOn()
+{
+}
+
+void ATestCharacter::ChangeLockOnTarget()
+{
+}
+
 // Called every frame
 void ATestCharacter::Tick(float DeltaTime)
 {
